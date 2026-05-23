@@ -1,0 +1,45 @@
+# Secrets & Credentials
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Databases (SQLite Local)
+*.sqlite
+*.sqlite.lock
+*.sqlite-journal
+backend/*.sqlite
+backend/*.sqlite.lock
+backend/*.sqlite-journal
+
+# Scraper Output Logs & Temporary Locks
+backend/scraper.log
+scraper.lock
+backend/scraper.lock
+backend/output_signals.csv
+
+# Package Dependencies
+node_modules/
+/node_modules
+backend/node_modules/
+frontend/node_modules/
+
+# Production Build Outputs
+frontend/dist/
+frontend/build/
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+.claude/
+.gemini/
