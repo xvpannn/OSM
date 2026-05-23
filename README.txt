@@ -1,55 +1,54 @@
-# Project Procedure and GitHub Upload Guide
+OSM (Open Source Mapping) – Working Mechanism
 
-## Overview
-This repository contains the **OSM** (Open Source Mapping) project. Below is a quick guide on the overall workflow and how to add this `README.txt` (or any other file) to the remote GitHub repository.
+1. Primary Objective
+OSM is a platform that collects, processes, and presents financial data (e.g., SEC filings) and market signals centrally. Data is extracted from public sources, stored in a database, and presented via APIs and a UI accessible to analysts or other applications.
+2. End-to-End Data Flow
+3. Scraping
+* The scraper.ts module (and scraper_uk.ts for UK data) fetches CSV/JSON filings from official websites (SEC, Companies House, etc.).
+* Each process is executed asynchronously with SIGINT signal handling for clean shutdown.
 
----
 
-## 1. Project Workflow
-1. **Develop locally** – Write code, run tests, and ensure everything compiles.
-2. **Commit changes** – Stage changed files with `git add <file>` and commit with a meaningful message.
-3. **Synchronise with remote** – Pull remote updates, resolve any conflicts, then push your commits.
+4. Transformation & Normalization
+* Raw data is cleaned, irrelevant columns are dropped, and data types are adjusted (e.g., dates to ISO-8601).
+* The exportCSV function writes results to CSV files for database import.
 
----
 
-## 2. Adding this README to GitHub
-```bash
-# Ensure you are in the repository root
-cd C:\DATA\PANDU\Ten\Portofolio
+5. Database Layer
+* The hybrid driver in db.ts determines which backend to use:
+* If the DATABASE_URL environment variable is present → use PostgreSQL (Supabase) via PostgresDbClient.
+* Otherwise → use local SQLite.
 
-# 1. Stage the README file
+
+* SQLite queries (e.g., INSERT OR IGNORE, PRAGMA) are automatically translated to PostgreSQL syntax (ON CONFLICT DO NOTHING, ignore PRAGMA).
+
+
+6. Schema Migration
+* Upon startup (initializeSystem in server.ts), the system checks the DB mode.
+* If PostgreSQL → executes a unified schema migration creating user tables, sessions, filings, signals, and critical indexes.
+* If SQLite → uses the existing schema in the .sqlite file.
+
+
+7. API & UI
+* The Express server (server.ts) exports RESTful endpoints such as /filings, /signals, and /auth.
+* The front-end (web portfolio) consumes these endpoints to display interactive tables, charts, and search features.
+
+
+8. Design Advantages
+
+* Database Portability – Code can run with SQLite locally for rapid development or switch to PostgreSQL in production without altering business logic.
+* Automated Query Translation – Users do not need to write different SQL for each DB; translateQuery and translateSchemaSql handle syntax differences.
+* Signal & Filing Management – All financial data is centralized, facilitating historical analysis and AI model creation.
+* Unified Migration Schema – When first run on PostgreSQL, the system automatically creates the complete schema and seeds the master account.
+
+4. How to Add or Update the README
+5. Edit the README.txt file with the text above or add other relevant sections.
+6. Commit changes:
 git add README.txt
-
-# 2. Commit with a descriptive message
-git commit -m "Add project procedure README"
-
-# 3. Pull remote changes (if any) and re‑base
-git pull --rebase origin main
-
-# 4. Push the commit to GitHub
+git commit -m "Update README with OSM mechanism description"
+7. Sync with remote GitHub:
+git pull --rebase origin main   # ensure no conflicts
 git push -u origin main
-```
-
-> **Tip:** If the remote has diverged and you encounter a conflict, resolve the conflicted files, `git add` them, then run `git rebase --continue` before pushing again.
 
 ---
 
-## 3. Common Git Commands
-| Command | Description |
-|---------|------------|
-| `git status` | Shows staged/unstaged changes |
-| `git diff` | View differences before committing |
-| `git log --oneline` | Compact view of commit history |
-| `git branch -M main` | Rename current branch to `main` |
-| `git remote add origin <url>` | Link local repo to GitHub |
-| `git push -f origin main` | Force push (use with caution) |
-
----
-
-## 4. Additional Resources
-- **GitHub Docs:** https://docs.github.com/en/repositories
-- **Git Cheat Sheet:** https://education.github.com/git-cheat-sheet-education.pdf
-
----
-
-*Created on 2026‑05‑23.*
+This document was created on 2026-05-23.
